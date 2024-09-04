@@ -1,0 +1,28 @@
+# Install and import modules (if not already done)
+Install-Module -Name Microsoft.PowerApps.Administration.PowerShell -Force
+Install-Module -Name Microsoft.PowerApps.PowerShell -Force
+ 
+# Authenticate
+Add-PowerAppsAccount
+ 
+# Get all flows from the specified environment
+$environmentId = 'Default-80db2abc1234456789'  # Replace with your environment ID
+$flows = Get-AdminFlow -Environment $environmentId
+ 
+# Define the user email and role
+$serviceAccountEmail = "srkumar@delphime.com"  # Replace email
+$roleName = "CanEdit"  # change role as required
+ 
+# Principal ObjectID
+$principalObjectId = '150abc-12w43e5r5r6666' # Get User Object ID from AD
+ 
+# Share each flow with the user
+foreach ($flow in $flows) {
+    try {
+        Set-AdminFlowOwnerRole -PrincipalType User -PrincipalObjectId $principalObjectId -RoleName $roleName -FlowName $flow.FlowName -EnvironmentName $environmentId
+        Write-Output "Shared flow with ID $($flow.FlowId) successfully."
+    }
+    catch {
+        Write-Output "Failed to share flow with ID $($flow.FlowId): $_"
+    }
+}
